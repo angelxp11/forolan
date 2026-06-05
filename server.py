@@ -7,8 +7,8 @@ from datetime import datetime
 # ─────────────────────────────────────────────
 #  CONFIG
 # ─────────────────────────────────────────────
-HOST      = "0.0.0.0"
-PORT      = 5555
+HOST      = "0.0.0.0"   # Escuchar en todas las interfaces IPv4 disponibles
+PORT      = 5555         # Puerto TCP fijo para conexiones de clientes
 HISTORIAL = "historial_foro.json"
 
 # ─────────────────────────────────────────────
@@ -57,6 +57,9 @@ def guardar_mensaje(datos: dict):
 #  BROADCAST
 # ─────────────────────────────────────────────
 def broadcast(datos: dict, excluir=None):
+    # Envío de datos a todos los clientes conectados, excepto el opcionalmente excluido.
+    # Usamos JSON con separador de línea para que el cliente pueda parsear mensajes
+    # concatenados en el stream TCP.
     raw = (json.dumps(datos, ensure_ascii=False) + "\n").encode("utf-8")
     with lock:
         muertos = []
@@ -90,6 +93,8 @@ def manejar_cliente(sock, addr):
     nick = None
     try:
         # ── Historial inicial ──────────────────
+        # Cuando un cliente se conecta, el servidor envía el historial de chat
+        # para que el usuario vea los últimos mensajes antes de continuar.
         hist = cargar_historial()
         if hist:
             enviar_a(sock, {"tipo": "historial_inicio", "mensaje": ""})
@@ -98,6 +103,8 @@ def manejar_cliente(sock, addr):
             enviar_a(sock, {"tipo": "historial_fin", "mensaje": ""})
 
         # ── Loop de recepción ──────────────────
+        # El servidor lee del socket en un loop infinito hasta que el cliente
+        # cierra la conexión o ocurre un error.
         buffer = ""
         while True:
             data = sock.recv(4096).decode("utf-8")
@@ -196,6 +203,7 @@ def main():
     log("INFO", f"Escuchando en {WHITE}{HOST}:{PORT}{R}  —  esperando clientes...\n")
 
     try:
+        # El servidor acepta conexiones TCP entrantes y crea un hilo por cliente.
         while True:
             conn, addr = servidor.accept()
             t = threading.Thread(target=manejar_cliente, args=(conn, addr), daemon=True)

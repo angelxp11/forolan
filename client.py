@@ -5,6 +5,10 @@ import tkinter as tk
 from tkinter import scrolledtext, messagebox, font as tkfont
 from datetime import datetime
 
+# El cliente usa sockets TCP para conectarse al servidor local.
+# Los mensajes se codifican/decodifican como JSON, y la recepción
+# se maneja en un hilo separado para no bloquear la interfaz.
+
 # ═══════════════════════════════════════════════════════════
 #  PALETA  —  tema cyberpunk oscuro
 # ═══════════════════════════════════════════════════════════
@@ -141,6 +145,8 @@ class LoginWindow:
         self.root.update()
 
         try:
+            # Crear socket TCP IPv4 y establecer un timeout breve
+            # para detectar rápidamente si el servidor no responde.
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(4)
             s.connect((ip, port))
@@ -377,6 +383,8 @@ class ForoWindow:
         t.start()
 
     def _recibir(self):
+        # Este hilo se encarga de leer datos del socket sin bloquear la UI.
+        # El servidor envía mensajes JSON separados por saltos de línea.
         buffer = ""
         while self.running:
             try:
@@ -391,6 +399,7 @@ class ForoWindow:
                         self.root.after(0, self._procesar, datos)
                         break
                     except json.JSONDecodeError:
+                        # Si no hay JSON completo aún, separar por líneas
                         if "\n" in buffer:
                             linea, buffer = buffer.split("\n", 1)
                             try:
@@ -436,6 +445,7 @@ class ForoWindow:
     # ── Red: enviar ──────────────────────────────────
     def _enviar_join(self):
         try:
+            # Enviar evento de unión al foro para que el servidor lo difunda.
             d = {"tipo": "join", "nickname": self.nick,
                  "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             self.sock.send((json.dumps(d) + "\n").encode("utf-8"))
@@ -455,6 +465,7 @@ class ForoWindow:
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         try:
+            # Envío de mensaje de chat codificado en JSON a través del socket TCP.
             self.sock.send((json.dumps(datos) + "\n").encode("utf-8"))
         except:
             self._append_sistema("No se pudo enviar el mensaje.")
