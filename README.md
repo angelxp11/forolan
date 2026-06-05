@@ -1,4 +1,4 @@
-# ◈ FORO LAN ◈
+#  FORO LAN 
 
 Sistema de foro local desarrollado en Python mediante arquitectura Cliente-Servidor sobre red LAN utilizando sockets TCP.
 
