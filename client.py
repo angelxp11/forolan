@@ -101,6 +101,7 @@ class LoginWindow:
             return var
 
         self.ip_var   = field(frame, "▸ IP DEL SERVIDOR", "127.0.0.1")
+        self.port_var = field(frame, "▸ PUERTO", "5555")
         self.nick_var = field(frame, "▸ TU NICKNAME")
 
         # Botón conectar
