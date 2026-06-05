@@ -31,6 +31,7 @@ NICK_COLORS = [
 ]
 _nick_map = {}
 _nick_idx = [0]
+DEFAULT_PORT = 5555
 
 def nick_color(nick):
     if nick not in _nick_map:
@@ -82,7 +83,7 @@ class LoginWindow:
         # Línea decorativa
         tk.Frame(frame, height=1, width=340, bg=C["accent"]).pack(pady=(0, 24))
 
-        def field(parent, label, default="", show=None):
+        def field(parent, label, default="", show=None, readonly=False):
             tk.Label(parent, text=label,
                      font=("Courier", 9, "bold"),
                      fg=C["text_dim"], bg=C["bg"],
@@ -96,12 +97,15 @@ class LoginWindow:
                          highlightthickness=1,
                          highlightcolor=C["accent"],
                          highlightbackground=C["border"],
-                         show=show or "")
+                         show=show or "",
+                         state="readonly" if readonly else "normal")
+            if readonly:
+                e.configure(readonlybackground=C["input_bg"])
             e.pack(fill="x", ipady=8, pady=(0, 16))
             return var
 
         self.ip_var   = field(frame, "▸ IP DEL SERVIDOR", "127.0.0.1")
-        self.port_var = field(frame, "▸ PUERTO", "5555")
+        self.port_var = field(frame, "▸ PUERTO (fijo)", str(DEFAULT_PORT), readonly=True)
         self.nick_var = field(frame, "▸ TU NICKNAME")
 
         # Botón conectar
@@ -125,11 +129,7 @@ class LoginWindow:
     def _conectar(self):
         ip   = self.ip_var.get().strip()
         nick = self.nick_var.get().strip()
-        try:
-            port = int(self.port_var.get().strip())
-        except:
-            self.status.config(text="✗  Puerto inválido")
-            return
+        port = DEFAULT_PORT
         if not ip:
             self.status.config(text="✗  Ingresa la IP del servidor")
             return
