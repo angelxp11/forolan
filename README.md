@@ -168,8 +168,7 @@ ForoLAN/
 ├── server.py
 ├── client.py
 ├── historial_foro.json
-├── README.md
-└── capturas/
+└── README.md
 ```
 
 ---
@@ -203,13 +202,13 @@ Se verificó:
 
 Trabajo Final de Telemática
 
-Universidad / Institución: __________
+Universidad de Investigacion y desarrollo - UDI
 
 Integrantes:
 
 * Jose Angel Bermúdez Choperena
-* ---
-* ---
-* ---
+* Karen Marcela Linares
+* Daniel Fernando Martinez Arias
+* Juan Sebastian Díaz Mantilla
 
 Fecha: Junio 2026
